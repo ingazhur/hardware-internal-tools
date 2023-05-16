@@ -59,13 +59,15 @@ def select_image():
             panel.configure(image=image)
             panel.image = image
 
-# when you click on the canvas, display the coordinates of the point at the side bar
+# when you click on canvas, display the coordinates of the click on the side bar
 def click(event):
-    x = event.x
-    y = event.y
-    print(x, y)
+    # display the coordinates of the click on the side bar
+    x, y = event.x, event.y
+    print("clicked at", x, y)
 
+# bind the click event to the canvas
 canvas.bind("<Button-1>", click)
+
         
 # display the button
 btn = tk.Button(side_bar, text="Select an image", command=select_image)
