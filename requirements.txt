@@ -2,3 +2,8 @@ matplotlib==3.7.1
 numpy==1.24.3
 Pillow==9.5.0
 scikit_learn==1.2.2
+torch # might need a specific version based on GPU/CPU support
+torchvision
+opencv-python
+transformers
+streamlit
