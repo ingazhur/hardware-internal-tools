@@ -1,34 +1,82 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import './components.css';
 
 const ImageUpload = () => {
-  const [image, setImage] = useState(null);
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    setImage(URL.createObjectURL(file));
-
-    e.preventDefault();
-    const data = new FormData();
-    data.append("file", file);
-    data.append("filename", e.target.value);
-
-    fetch("http://localhost:8000/upload", {
-      method: "POST",
-      body: data,
-    })
-      .then((response) => response.json())
-      .then((body) => {
-        setImage(`http://localhost:8000/${body.filename}`);
-      });
-  };
+    const [image, setImage] = useState(null);
+    const [rectangles, setRectangles] = useState([]);
+    const canvasRef = useRef(null);
+    const isDrawingRef = useRef(false);
+    const startPointRef = useRef(null);
+  
+    useEffect(() => {
+      if (image) {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(image, 0, 0);
+        rectangles.forEach(rectangle => {
+          ctx.beginPath();
+          ctx.rect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+          ctx.strokeStyle = 'red';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        });
+      }
+    }, [image, rectangles]);
+  
+    const handleImageUpload = e => {
+      const file = e.target.files[0];
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      img.onload = () => {
+        setImage(img);
+      };
+  
+      e.preventDefault();
+    };
+  
+    const handleMouseDown = e => {
+      const canvas = canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+  
+      isDrawingRef.current = true;
+      startPointRef.current = { x, y };
+    };
+  
+    const handleMouseUp = e => {
+      if (isDrawingRef.current) {
+        const canvas = canvasRef.current;
+        const rect = canvas.getBoundingClientRect();
+        const x = startPointRef.current.x - rect.left;
+        const y = startPointRef.current.y - rect.top;
+        const width = e.clientX - rect.left - startPointRef.current.x;
+        const height = e.clientY - rect.top - startPointRef.current.y;
+  
+        const newRectangle = { x, y, width, height };
+        setRectangles(prevRectangles => [...prevRectangles, newRectangle]);
+  
+        isDrawingRef.current = false;
+      }
+    };
 
   return (
     <div className="image-upload">
-      <div className="flex items-center justify-center w-full">
-        {image ? (
-          <img src={image} className="uploaded-image" />
+      <div className="flex items-center justify-center w-full" style={{ overflow: 'hidden' }}>
+      {image ? (
+        <div style={{ maxWidth: '100%', height: '100%'}}>
+            <canvas
+                ref={canvasRef}
+                width={image.width}
+                height={image.height}
+                style={{ objectFit: 'contain', width: '100%', height: '100%' }}
+                className="uploaded-image"
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+            />
+        </div>
         ) : (
           <label
             htmlFor="dropzone-file"
