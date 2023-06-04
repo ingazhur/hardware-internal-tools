@@ -2,6 +2,7 @@ import uvicorn
 import os
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.responses import FileResponse
 
 app = FastAPI()
 
@@ -26,6 +27,11 @@ async def upload_file(file: UploadFile = File(...)):
     with open(os.path.join(UPLOAD_FOLDER, file.filename), "wb") as f:
         f.write(contents)
     return {"filename": file.filename}
+
+@app.get("/{filename}")
+async def get_file(filename):
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    return FileResponse(file_path)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

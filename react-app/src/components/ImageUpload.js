@@ -8,28 +8,27 @@ const ImageUpload = () => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     setImage(URL.createObjectURL(file));
-  };
 
-  const handleSubmit = () => {
-    if (image) {
-      const formData = new FormData();
-      formData.append('image', image);
+    e.preventDefault();
+    const data = new FormData();
+    data.append("file", file);
+    data.append("filename", e.target.value);
 
-      axios.post('http://localhost:5000/upload', formData)
-        .then((response) => {
-          console.log(response.data); // Handle response from the backend
-        })
-        .catch((error) => {
-          console.error(error); // Handle error if any
-        });
-    }
+    fetch("http://localhost:8000/upload", {
+      method: "POST",
+      body: data,
+    })
+      .then((response) => response.json())
+      .then((body) => {
+        setImage(`http://localhost:8000/${body.filename}`);
+      });
   };
 
   return (
     <div className="image-upload">
       <div className="flex items-center justify-center w-full">
         {image ? (
-          <img src={image} alt="Uploaded" className="uploaded-image" />
+          <img src={image} className="uploaded-image" />
         ) : (
           <label
             htmlFor="dropzone-file"
@@ -65,7 +64,6 @@ const ImageUpload = () => {
           </label>
         )}
       </div>
-      <button onClick={handleSubmit}>Upload Image</button>
     </div>
   );
 };
