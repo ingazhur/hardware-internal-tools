@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import './components.css';
 
 const ImageUpload = () => {
@@ -7,6 +8,21 @@ const ImageUpload = () => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     setImage(URL.createObjectURL(file));
+  };
+
+  const handleSubmit = () => {
+    if (image) {
+      const formData = new FormData();
+      formData.append('image', image);
+
+      axios.post('http://localhost:5000/upload', formData)
+        .then((response) => {
+          console.log(response.data); // Handle response from the backend
+        })
+        .catch((error) => {
+          console.error(error); // Handle error if any
+        });
+    }
   };
 
   return (
@@ -49,6 +65,7 @@ const ImageUpload = () => {
           </label>
         )}
       </div>
+      <button onClick={handleSubmit}>Upload Image</button>
     </div>
   );
 };
