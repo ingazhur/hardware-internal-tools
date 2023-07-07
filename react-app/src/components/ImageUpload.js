@@ -8,6 +8,7 @@ const ImageUpload = () => {
     const canvasRef = useRef(null);
     const isDrawingRef = useRef(false);
     const startPointRef = useRef(null);
+    const [mouseMove, setMouseMove] = useState({ x: 0, y: 0 });
   
     useEffect(() => {
       if (image) {
@@ -24,6 +25,14 @@ const ImageUpload = () => {
         });
       }
     }, [image, rectangles]);
+
+    const handleMouseMove = e => {
+      const canvas = canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      setMouseMove({ x, y });
+    };
   
     const handleImageUpload = e => {
       const file = e.target.files[0];
@@ -75,7 +84,10 @@ const ImageUpload = () => {
                 className="uploaded-image"
                 onMouseDown={handleMouseDown}
                 onMouseUp={handleMouseUp}
+                onMouseMove={handleMouseMove}
             />
+            <p>Mouse X: {mouseMove.x}</p>
+            <p>Mouse Y: {mouseMove.y}</p>
         </div>
         ) : (
           <label
